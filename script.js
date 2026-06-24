@@ -1,4 +1,6 @@
 const API_URL = "http://127.0.0.1:5000";
+let produtoEditandoId = null;
+
 async function buscarProdutos() {
     const resposta = await fetch(API_URL + "/produtos");   
     const produtos = await resposta.json()
@@ -12,7 +14,9 @@ async function buscarProdutos() {
             <td>${produto.quantidade}</td>
             <td>${produto.custo}</td>
             <td>${produto.valor_venda}</td>
-            <td><button class="btn btn-danger btn-sm" onclick="deletarProduto(${produto.id})">Deletar</button></td>
+            <td><button class="btn btn-danger btn-sm" onclick="deletarProduto(${produto.id})">Deletar</button>
+            <button class="btn btn-warning btn-sm" onclick="editarProduto(${produto.id}, '${produto.nome}', '${produto.categoria}', ${produto.quantidade}, ${produto.custo}, ${produto.valor_venda})">Editar</button>
+            </td>
         </tr>
     `;
 });
@@ -23,13 +27,24 @@ async function cadastrarProduto() {
     const quantidade = document.getElementById("quantidade").value;
     const custo = document.getElementById("custo").value;
     const valor_venda = document.getElementById("valor_venda").value;
-    await fetch(API_URL + "/produtos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, categoria, quantidade, custo, valor_venda })
-});
-await buscarProdutos();
+
+    if (produtoEditandoId) {
+        await fetch(API_URL + "/produtos/" + produtoEditandoId, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nome, categoria, quantidade, custo, valor_venda })
+        });
+        produtoEditandoId = null;
+    } else {
+        await fetch(API_URL + "/produtos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nome, categoria, quantidade, custo, valor_venda })
+        });
+    }
+    await buscarProdutos();
 }
+
 document.getElementById("btnCadastrar").addEventListener("click", cadastrarProduto);
 async function buscar() {
     const texto = document.getElementById("campoBusca").value;
@@ -55,7 +70,9 @@ async function buscar() {
                 <td>${produto.quantidade}</td>
                 <td>${produto.custo}</td>
                 <td>${produto.valor_venda}</td>
-                <td><button class="btn btn-danger btn-sm" onclick="deletarProduto(${produto.id})">Deletar</button></td>
+                <td><button class="btn btn-danger btn-sm" onclick="deletarProduto(${produto.id})">Deletar</button>
+                <button class="btn btn-warning btn-sm" onclick="editarProduto(${produto.id}, '${produto.nome}', '${produto.categoria}', ${produto.quantidade}, ${produto.custo}, ${produto.valor_venda})">Editar</button>
+                </td>
             </tr>
         `;
     });
@@ -68,5 +85,13 @@ async function deletarProduto(id) {
     await buscar();
 }
 
+function editarProduto(id, nome, categoria, quantidade, custo, valor_venda) {
+    produtoEditandoId = id;
+    document.getElementById("nome").value = nome;
+    document.getElementById("categoria").value = categoria;
+    document.getElementById("quantidade").value = quantidade;
+    document.getElementById("custo").value = custo;
+    document.getElementById("valor_venda").value = valor_venda;
+}
 
 document.getElementById("btnBuscar").addEventListener("click", buscar);
