@@ -1,8 +1,11 @@
 from flask import Flask, jsonify, request
 from movimentacoes import movimentacoes_bp
 from database import supabase
+from flask_cors import CORS
 
 app = Flask(__name__)
+
+CORS(app)
 
 @app.route("/produtos", methods=["GET"])
 def listar_produtos():
